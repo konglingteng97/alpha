@@ -1,0 +1,12 @@
+rol/verbose 0
+#
+
+/run/verbose 0
+#
+/run/initialize
+#/run/setCut 0.01 um
+#/gun/particle ion
+#/gun/ion 95 241
+#
+/tracking/verbose 0
+/run/beamOn 100
