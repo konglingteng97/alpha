@@ -1,11 +1,9 @@
-//
-//__author__ = "Lingteng Kong <jn19830@bristol.ac.uk>"
-//__copyright__ = "Copyright (c) Lingteng Kong"
-//__created__ = "[08/07/2020 Wed 22:48]"
-//
-/// \file PhysicsList.cc
-/// \brief physical process to simulate
-//
+/*
+ * @Author: Lingteng Kong 
+ * @Date: 2020-07-17 00:09:53 
+ * @Last Modified by: Lingteng Kong
+ * @Last Modified time: 2020-07-17 02:33:55
+ */
 
 #include "globals.hh"
 #include "PhysicsList.hh"
@@ -40,7 +38,7 @@
 
 //radioactive decay
 #include "G4PhysicsListHelper.hh"
-#include "G4RadioactiveDecay.hh"
+#include "G4Radioactivation.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4NuclideTable.hh"
 #include "G4UAtomicDeexcitation.hh"
@@ -69,7 +67,7 @@
 
 #include "G4hIonisation.hh"
 
-G4ThreadLocal G4int PhysicsList::fVerboseLevel = 1;
+G4ThreadLocal G4int PhysicsList::fVerboseLevel = 0; // run in silent mode
 G4ThreadLocal G4int PhysicsList::fMaxNumPhotonStep = 20;
 G4ThreadLocal G4Cerenkov* PhysicsList::fCerenkovProcess = 0;
 G4ThreadLocal G4Scintillation* PhysicsList::fScintillationProcess = 0;
@@ -162,7 +160,7 @@ void PhysicsList::ConstructProcess()
 //radioactive decay process
 void PhysicsList::ConstructRadioactiveDecay()
 {
-  G4RadioactiveDecay* radioactiveDecay = new G4RadioactiveDecay();
+  G4Radioactivation* radioactiveDecay = new G4Radioactivation();
 
   radioactiveDecay->SetARM(false);               //Atomic Rearangement
   
@@ -298,7 +296,6 @@ void PhysicsList::ConstructOp()
       pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
     }
     if (particleName == "opticalphoton") {
-      G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
       pmanager->AddDiscreteProcess(fAbsorptionProcess);
       pmanager->AddDiscreteProcess(fRayleighScatteringProcess);
       pmanager->AddDiscreteProcess(fMieHGScatteringProcess);

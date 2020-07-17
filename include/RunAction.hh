@@ -15,6 +15,7 @@
 
 //
 class G4Timer;
+class HistoManager;
 class G4Run;
 
 class RunAction : public G4UserRunAction
@@ -28,7 +29,8 @@ class RunAction : public G4UserRunAction
     virtual void EndOfRunAction(const G4Run* aRun);
 
   private:
-    G4Timer* fTimer;
+    G4Timer*                fTimer;
+    HistoManager*           fHistoManager;    
 };
 
 #endif /*RunAction_h*/

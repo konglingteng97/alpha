@@ -1,11 +1,9 @@
-//
-//__author__ = "Lingteng Kong <jn19830@bristol.ac.uk>"
-//__copyright__ = "Copyright (c) Lingteng Kong"
-//__created__ = "[02/07/2020 Thu 13:27]"
-//
-/// \file PrimaryGeneratorAction.cc
-/// \brief define and generate alpha source at the beginning of the simulation
-//
+/*
+ * @Author: Lingteng Kong 
+ * @Date: 2020-07-16 22:59:37 
+ * @Last Modified by:   Lingteng Kong 
+ * @Last Modified time: 2020-07-16 22:59:37 
+ */
 
 #include "PrimaryGeneratorAction.hh"
 
@@ -43,7 +41,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
 //geantino is a virtual particle used for simulation and which does not interact with materials.
   if (fParticleGun->GetParticleDefinition() == G4Geantino::Geantino()) {  
-//Am-241 alpha source
+    //Am-241 alpha source
     G4int Z = 95, A = 241;
     G4double ionCharge   = 0.*eplus;
     G4double excitEnergy = 0.*keV;

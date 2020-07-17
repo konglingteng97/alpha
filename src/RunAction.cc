@@ -1,16 +1,14 @@
-//
-//__author__ = "Lingteng Kong <jn19830@bristol.ac.uk>"
-//__copyright__ = "Copyright (c) Lingteng Kong"
-//__created__ = "[02/07/2020 Thu 19:57]"
-//
-/// \file RunAction.cc
-/// \brief one simulation event
-//
+/*
+ * @Author: Lingteng Kong 
+ * @Date: 2020-07-15 20:10:49 
+ * @Last Modified by: Lingteng Kong
+ * @Last Modified time: 2020-07-17 02:24:26
+ */
 
-// Make this appear first!
 #include "G4Timer.hh"
 
 #include "RunAction.hh"
+#include "HistoManager.hh"
 
 #include "g4root.hh"
 
@@ -20,45 +18,48 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-//
+
 RunAction::RunAction()
  : G4UserRunAction(),
-   fTimer(0)
+   fTimer(0),fHistoManager(0)
 {
   fTimer = new G4Timer;
-
-  auto analysisManager = G4AnalysisManager::Instance();
-  G4cout << "Using" << analysisManager->GetType() << G4endl;
-
-  analysisManager->CreateH1("Scintillation Photon","Scintillation Photon",10000,-100.*cm,100.*cm);
+  fHistoManager = new HistoManager();
 }
 
-//
 RunAction::~RunAction()
 {
+  delete fHistoManager;
   delete fTimer;
 }
 
-//
+//Begin of run action
 void RunAction::BeginOfRunAction(const G4Run* aRun)
 {
   G4cout << "### Run " << aRun->GetRunID() << " start." << G4endl;
   fTimer->Start();
 
-  auto analysisManager = G4AnalysisManager::Instance();
-  G4String fileName = "Mydata";
-  analysisManager->OpenFile(fileName);
+  //histograms
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  if ( analysisManager->IsActive() ) {
+    analysisManager->OpenFile();
+  }
 }
 
-//
+//End of run action, which is after the end of event action
 void RunAction::EndOfRunAction(const G4Run* aRun)
 {
-  auto analysisManager = G4AnalysisManager::Instance();
+ //save histograms
+ G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+ if ( analysisManager->IsActive() ) {
   analysisManager->Write();
   analysisManager->CloseFile();
+  G4cout << "---Data has been saved, have a good day----" << G4endl;
+ }
 
   fTimer->Stop();
+  
   //Get the ID of this run action
-  G4cout << "number of event = " << aRun->GetNumberOfEvent()
+  G4cout << "### Number of event = " << aRun->GetNumberOfEvent()
          << " " << *fTimer << G4endl;
 }

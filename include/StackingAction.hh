@@ -1,11 +1,9 @@
-//
-//__author__ = "Lingteng Kong <jn19830@bristol.ac.uk>"
-//__copyright__ = "Copyright (c) Lingteng Kong"
-//__created__ = "[03/07/2020 Fri 11:22]"
-//
-/// \file StackingAction.hh
-/// \brief stacking action is a higher level of stepping action
-//
+/*
+ * @Author: Lingteng Kong 
+ * @Date: 2020-07-16 19:05:37 
+ * @Last Modified by:   Lingteng Kong 
+ * @Last Modified time: 2020-07-16 19:05:37 
+ */
 
 
 #ifndef StackingAction_H
@@ -27,8 +25,6 @@ class StackingAction : public G4UserStackingAction
     virtual void PrepareNewEvent();
 
   private:
-    G4int fScintillationCounter;
-    G4double posx;
 };
 
 #endif

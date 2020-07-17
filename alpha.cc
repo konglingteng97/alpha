@@ -1,11 +1,9 @@
-//
-//__author__ = "Lingteng Kong <jn19830@bristol.ac.uk>"
-//__copyright__ = "Copyright (c) Lingteng Kong"
-//__created__ = "[06/07/2020 Mon 15:24]"
-//
-/// \file alpha.cc
-/// \brief put everything together to create a Geant4 application
-//
+/*
+ * @Author: Lingteng Kong 
+ * @Date: 2020-07-16 23:42:15 
+ * @Last Modified by: Lingteng Kong
+ * @Last Modified time: 2020-07-17 00:00:22
+ */
 
 #include "G4Types.hh"
 
@@ -27,19 +25,19 @@
 
 int main(int argc,char** argv)
 {
-
   // Detect interactive mode (if no arguments) and define UI session
   G4UIExecutive* ui = 0;
   if ( argc == 1 ) {
     ui = new G4UIExecutive(argc, argv);
   }
 
-  // Optionally: choose a different Random engine...
-  // G4Random::setTheEngine(new CLHEP::MTwistEngine);
+  //choose the Random engine
+  CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
   
   // Get instance of runmanager
 #ifdef G4MULTITHREADED
   G4MTRunManager* runManager = new G4MTRunManager;
+  runManager->SetNumberOfThreads(std::min(4,G4Threading::G4GetNumberOfCores()));
 #else
   G4RunManager* runManager = new G4RunManager;
 #endif
@@ -56,9 +54,11 @@ int main(int argc,char** argv)
   // User action initialization
   runManager->SetUserInitialization(new ActionInitialization());
 
+  //initialize G4 kernel
+  runManager->Initialize();
+
   // Initialize visualization
-  G4VisManager* visManager = new G4VisExecutive;
-  visManager->Initialize();
+  G4VisManager* visManager = nullptr;
 
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
@@ -72,6 +72,8 @@ int main(int argc,char** argv)
   }
   else { 
     // interactive mode
+    visManager = new G4VisExecutive;
+    visManager->Initialize();
     UImanager->ApplyCommand("/control/execute init_vis.mac");
     ui->SessionStart();
     delete ui;
