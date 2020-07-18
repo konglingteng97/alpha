@@ -28,6 +28,6 @@ SteppingAction::~SteppingAction()
 { ; }
 
 //Method called at the end of each step
-void SteppingAction::UserSteppingAction(const G4Step* step)
+void SteppingAction::UserSteppingAction(const G4Step*)
 {
 }

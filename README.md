@@ -4,13 +4,13 @@ Author: Lingteng Kong (jn19830@bristol.ac.uk)
 
 ## Geometry construction
 
-- It is a simple square box with length of 10 m, filled with gas.
+- A square box with length of 10 m, filled with gas.
 
 ## Physics list
 
 - PhysicsList.cc defines physical processes and relevant particle definitions.
 
-- Include decay, ionization, scintillation process
+- Include decay, ionization, scintillation process.
          
 ## Primary generator
 
@@ -51,6 +51,8 @@ in case of interactive running mode.
 > cd alpha
 
 ## 2. Build code
+
+> mkdir build
 
 > cd build
 
