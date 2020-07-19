@@ -2,7 +2,7 @@
  * @Author: Lingteng Kong 
  * @Date: 2020-07-17 02:40:49 
  * @Last Modified by: Lingteng Kong
- * @Last Modified time: 2020-07-17 11:47:41
+ * @Last Modified time: 2020-07-19 14:37:19
  */
 
 #include "DetectorConstruction.hh"
@@ -31,7 +31,7 @@ DetectorConstruction::~DetectorConstruction(){;}
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
 
-//Define air
+ //Define air
   G4double a, z, density;
   G4int nelements;
 
@@ -42,53 +42,43 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   air->AddElement(N, 70.*perCent);
   air->AddElement(O, 30.*perCent);
 
-//air properties table
+ //air properties table
+ //number of photons generated is proportional to the energy lost during the step
   G4double photonEnergy[] =
               { 3.168*eV, 3.258*eV, 3.301*eV, 3.466*eV,
                 3.505*eV, 3.678*eV, 3.925*eV, 3.954*eV };
 
-            //default value  
-            // { 2.034*eV, 2.068*eV, 2.103*eV, 2.139*eV,
-            //   2.177*eV, 2.216*eV, 2.256*eV, 2.298*eV,
-            //   2.341*eV, 2.386*eV, 2.433*eV, 2.481*eV,
-            //   2.532*eV, 2.585*eV, 2.640*eV, 2.697*eV,
-            //   2.757*eV, 2.820*eV, 2.885*eV, 2.954*eV,
-            //   3.026*eV, 3.102*eV, 3.181*eV, 3.265*eV,
-            //   3.353*eV, 3.446*eV, 3.545*eV, 3.649*eV,
-            //   3.760*eV, 3.877*eV, 4.002*eV, 4.136*eV };
-
   const G4int nEntries = sizeof(photonEnergy)/sizeof(G4double);
 
+  //Fast intensity
   G4double scintilFast[] =
             { 0.28, 0.27, 0.18, 0.67, 
-              0.21, 1.00, 0.39, 0.11 };
+              0.21, 1., 0.39, 0.11 };
 
   assert(sizeof(scintilFast) == sizeof(photonEnergy));
 
-  G4double scintilSlow[] =
-            { 0.28, 0.27, 0.18, 0.67, 
-              0.21, 1.00, 0.39, 0.11 };
+  // //Slow intensity
+  // G4double scintilSlow[] =
+  //           { 0.28, 0.27, 0.18, 0.67, 
+  //             0.21, 1.00, 0.39, 0.11 };
 
-  assert(sizeof(scintilSlow) == sizeof(photonEnergy));
+  // assert(sizeof(scintilSlow) == sizeof(photonEnergy));
 
 
   G4MaterialPropertiesTable* myMPT1 = new G4MaterialPropertiesTable();
   
   myMPT1->AddProperty("FASTCOMPONENT",photonEnergy, scintilFast, nEntries)
         ->SetSpline(true);
-  myMPT1->AddProperty("SLOWCOMPONENT",photonEnergy, scintilSlow, nEntries)
-        ->SetSpline(true);
+  // myMPT1->AddProperty("SLOWCOMPONENT",photonEnergy, scintilSlow, nEntries)
+  //       ->SetSpline(true);
 
-  //scintillation photon produced per absorbed energy 
+  //gaussian distribution? scintillation photon produced per absorbed energy 
   myMPT1->AddConstProperty("SCINTILLATIONYIELD",20./MeV);
   //broadens the statistical distribution of generated photons
   //widen given by resolutionscale*sqrt(meannumberofphotons)
-  myMPT1->AddConstProperty("RESOLUTIONSCALE",1.);
-  myMPT1->AddConstProperty("SCINTILLATIONYIELD",1.2); //gaussian distribution
-  myMPT1->AddConstProperty("FASTTIMECONSTANT", 1.*ns);
-  myMPT1->AddConstProperty("SLOWTIMECONSTANT",10.*ns);
-  //The relative strength of the fast component as a fraction of total scintillation yield
-  myMPT1->AddConstProperty("YIELDRATIO",1.0);   
+  myMPT1->AddConstProperty("RESOLUTIONSCALE",1.); // >1 broaden the fluctuation 
+  //Decay time constant
+  myMPT1->AddConstProperty("FASTTIMECONSTANT", 1.*ns);  
 
   // G4cout << "Air G4MaterialPropertiesTable" << G4endl;
   // myMPT1->DumpTable();

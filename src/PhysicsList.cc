@@ -2,7 +2,7 @@
  * @Author: Lingteng Kong 
  * @Date: 2020-07-17 00:09:53 
  * @Last Modified by: Lingteng Kong
- * @Last Modified time: 2020-07-17 02:33:55
+ * @Last Modified time: 2020-07-19 23:08:38
  */
 
 #include "globals.hh"
@@ -21,7 +21,7 @@
 
 #include "G4ProcessManager.hh"
 
-#include "G4Cerenkov.hh"
+//Op
 #include "G4Scintillation.hh"
 #include "G4OpAbsorption.hh"
 #include "G4OpRayleigh.hh"
@@ -31,7 +31,6 @@
 #include "G4LossTableManager.hh"
 #include "G4EmSaturation.hh"
 
-#include "PhysicsList.hh"
 #include "G4UnitsTable.hh"
 
 #include "G4Threading.hh"
@@ -44,9 +43,6 @@
 #include "G4UAtomicDeexcitation.hh"
 #include "G4NuclearLevelData.hh"
 #include "G4DeexPrecoParameters.hh"
-
-//decay
-#include "G4Decay.hh"
 
 //EM
 #include "G4ComptonScattering.hh"
@@ -69,42 +65,38 @@
 
 G4ThreadLocal G4int PhysicsList::fVerboseLevel = 0; // run in silent mode
 G4ThreadLocal G4int PhysicsList::fMaxNumPhotonStep = 20;
-G4ThreadLocal G4Cerenkov* PhysicsList::fCerenkovProcess = 0;
 G4ThreadLocal G4Scintillation* PhysicsList::fScintillationProcess = 0;
 G4ThreadLocal G4OpAbsorption* PhysicsList::fAbsorptionProcess = 0;
 G4ThreadLocal G4OpRayleigh* PhysicsList::fRayleighScatteringProcess = 0;
 G4ThreadLocal G4OpMieHG* PhysicsList::fMieHGScatteringProcess = 0;
 G4ThreadLocal G4OpBoundaryProcess* PhysicsList::fBoundaryProcess = 0;
  
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+//
 PhysicsList::PhysicsList() 
  : G4VUserPhysicsList()
 {
+  // mandatory for G4NuclideTable
+  G4NuclideTable::GetInstance()->SetThresholdOfHalfLife(0.1*picosecond);
+  G4NuclideTable::GetInstance()->SetLevelTolerance(1.0*eV);
+
+  //read new PhotonEvaporation data set 
+  G4DeexPrecoParameters* deex = 
+    G4NuclearLevelData::GetInstance()->GetParameters();
+  deex->SetCorrelatedGamma(false);
+  deex->SetStoreAllLevels(true);
+  deex->SetMaxLifeTime(G4NuclideTable::GetInstance()->GetThresholdOfHalfLife()
+                /std::log(2.));
+
   G4EmParameters* param = G4EmParameters::Instance();
   param->SetFluo(true);
   param->SetAuger(true);
   param->SetAugerCascade(true);
   param->SetDeexcitationIgnoreCut(true);
   G4NuclearLevelData::GetInstance()->GetParameters()->SetUseFilesNEW(true);
-  //add new units for radioActive decays
-  // 
-  const G4double minute = 60*second;
-  const G4double hour   = 60*minute;
-  const G4double day    = 24*hour;
-  const G4double year   = 365*day;
-  new G4UnitDefinition("minute", "min", "Time", minute);
-  new G4UnitDefinition("hour",   "h",   "Time", hour);
-  new G4UnitDefinition("day",    "d",   "Time", day);
-  new G4UnitDefinition("year",   "y",   "Time", year);
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PhysicsList::~PhysicsList() 
 {}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PhysicsList::ConstructParticle()
 {
@@ -146,13 +138,11 @@ void PhysicsList::ConstructParticle()
   iConstructor.ConstructParticle(); 
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+//
 void PhysicsList::ConstructProcess()
 {
   AddTransportation();
   ConstructRadioactiveDecay();
-  ConstructDecay();
   ConstructEM();
   ConstructOp();
 }
@@ -162,43 +152,26 @@ void PhysicsList::ConstructRadioactiveDecay()
 {
   G4Radioactivation* radioactiveDecay = new G4Radioactivation();
 
-  radioactiveDecay->SetARM(false);               //Atomic Rearangement
-  
-  G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();  
+  G4bool ARMflag = false;
+  radioactiveDecay->SetARM(ARMflag);        //Atomic Rearangement
+
+  // need to initialize atomic deexcitation
+  G4LossTableManager* man = G4LossTableManager::Instance();
+  G4VAtomDeexcitation* deex = man->AtomDeexcitation();
+  if (!deex) {
+     ///G4EmParameters::Instance()->SetFluo(true);
+     G4EmParameters::Instance()->SetAugerCascade(ARMflag);
+     deex = new G4UAtomicDeexcitation();
+     deex->InitialiseAtomicDeexcitation();
+     man->SetAtomDeexcitation(deex);
+  }
+
+  // register radioactiveDecay
+  G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
   ph->RegisterProcess(radioactiveDecay, G4GenericIon::GenericIon());
-
-  // Need to initialize atomic deexcitation outside of radioactive decay
-  G4LossTableManager* theManager = G4LossTableManager::Instance();
-  G4VAtomDeexcitation* p = theManager->AtomDeexcitation();
-  if (!p) {
-     G4UAtomicDeexcitation* atomDeex = new G4UAtomicDeexcitation();
-     theManager->SetAtomDeexcitation(atomDeex);
-     atomDeex->InitialiseAtomicDeexcitation();
-  }
-
-  // mandatory for G4NuclideTable
-  G4NuclideTable::GetInstance()->SetThresholdOfHalfLife(0.1*picosecond);
-  G4NuclideTable::GetInstance()->SetLevelTolerance(1.0*eV);  
 }
 
-void PhysicsList::ConstructDecay()
-{
-  // Add Decay Process
-  G4Decay* theDecayProcess = new G4Decay();
-  auto particleIterator=GetParticleIterator();
-  particleIterator->reset();
-  while( (*particleIterator)() ){
-    G4ParticleDefinition* particle = particleIterator->value();
-    G4ProcessManager* pmanager = particle->GetProcessManager();
-    if (theDecayProcess->IsApplicable(*particle)) {
-      pmanager ->AddProcess(theDecayProcess);
-      // set ordering for PostStepDoIt and AtRestDoIt
-      pmanager ->SetProcessOrdering(theDecayProcess, idxPostStep);
-      pmanager ->SetProcessOrdering(theDecayProcess, idxAtRest);
-    }
-  }
-}
-
+//EM process (ionisation)
 void PhysicsList::ConstructEM()
 {
   auto particleIterator=GetParticleIterator();
@@ -251,12 +224,9 @@ void PhysicsList::ConstructEM()
   }
 }
 
+//scintillation and other optical process
 void PhysicsList::ConstructOp()
 {
-  fCerenkovProcess = new G4Cerenkov("Cerenkov");
-  fCerenkovProcess->SetMaxNumPhotonsPerStep(fMaxNumPhotonStep);
-  fCerenkovProcess->SetMaxBetaChangePerStep(10.0);
-  fCerenkovProcess->SetTrackSecondariesFirst(true);
   fScintillationProcess = new G4Scintillation("Scintillation");
   fScintillationProcess->SetScintillationYieldFactor(1.);
   fScintillationProcess->SetTrackSecondariesFirst(true);
@@ -265,7 +235,6 @@ void PhysicsList::ConstructOp()
   fMieHGScatteringProcess = new G4OpMieHG();
   fBoundaryProcess = new G4OpBoundaryProcess();
 
-  fCerenkovProcess->SetVerboseLevel(fVerboseLevel);
   fScintillationProcess->SetVerboseLevel(fVerboseLevel);
   fAbsorptionProcess->SetVerboseLevel(fVerboseLevel);
   fRayleighScatteringProcess->SetVerboseLevel(fVerboseLevel);
@@ -286,14 +255,13 @@ void PhysicsList::ConstructOp()
     G4ParticleDefinition* particle = particleIterator->value();
     G4ProcessManager* pmanager = particle->GetProcessManager();
     G4String particleName = particle->GetParticleName();
-    if (fCerenkovProcess->IsApplicable(*particle)) {
-      pmanager->AddProcess(fCerenkovProcess);
-      pmanager->SetProcessOrdering(fCerenkovProcess,idxPostStep);
-    }
     if (fScintillationProcess->IsApplicable(*particle)) {
-      pmanager->AddProcess(fScintillationProcess);
-      pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
-      pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
+      //limit the scintillation process to electron
+      if (particleName == "e-"){
+        pmanager->AddProcess(fScintillationProcess);
+        pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
+        pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
+      }
     }
     if (particleName == "opticalphoton") {
       pmanager->AddDiscreteProcess(fAbsorptionProcess);
@@ -304,13 +272,10 @@ void PhysicsList::ConstructOp()
   }
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void PhysicsList::SetVerbose(G4int verbose)
 {
   fVerboseLevel = verbose;
 
-  fCerenkovProcess->SetVerboseLevel(fVerboseLevel);
   fScintillationProcess->SetVerboseLevel(fVerboseLevel);
   fAbsorptionProcess->SetVerboseLevel(fVerboseLevel);
   fRayleighScatteringProcess->SetVerboseLevel(fVerboseLevel);
@@ -318,22 +283,9 @@ void PhysicsList::SetVerbose(G4int verbose)
   fBoundaryProcess->SetVerboseLevel(fVerboseLevel);
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void PhysicsList::SetNbOfPhotonsCerenkov(G4int MaxNumber)
-{
-  fMaxNumPhotonStep = MaxNumber;
-
-  fCerenkovProcess->SetMaxNumPhotonsPerStep(fMaxNumPhotonStep);
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void PhysicsList::SetCuts()
 {
-  //  " G4VUserPhysicsList::SetCutsWithDefault" method sets
-  //   the default cut value for all particle types
-  //
+  //sets the default cut value for all particle types
   SetCutsWithDefault();
 
   if (verboseLevel>0) DumpCutValuesTable();

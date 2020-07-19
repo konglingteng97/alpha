@@ -1,6 +1,10 @@
 # Alpha induced fluorescence Geant4 simulation
 
-Author: Lingteng Kong (jn19830@bristol.ac.uk)
+- Author: Lingteng Kong (jn19830@bristol.ac.uk) 
+
+- Copyright (c) Lingteng Kong
+
+- Data: 29.06.2020
 
 ## Geometry construction
 
@@ -8,9 +12,7 @@ Author: Lingteng Kong (jn19830@bristol.ac.uk)
 
 ## Physics list
 
-- PhysicsList.cc defines physical processes and relevant particle definitions.
-
-- Include decay, ionization, scintillation process.
+- Include radioactivedecay, ionization, scintillation process and relevant particle definition.
          
 ## Primary generator
 
@@ -22,12 +24,12 @@ Author: Lingteng Kong (jn19830@bristol.ac.uk)
 
 - The histos can be individually activated with the command :
 /analysis/h1/set id nbBins  valMin valMax unit 
-where unit is the desired unit for the histo (MeV or keV, deg or mrad, etc..)
+where unit is the desired unit for the histo (MeV or keV, mm or cm, etc..)
 
-One can control the name of the histograms file with the command:
-/analysis/setFileName  name  (default rdecay1)
+- One can control the name of the histograms file with the command:
+/analysis/setFileName  name 
 
-It is possible to choose the format of the histogram file : root (default),
+- It is possible to choose the format of the histogram file : root (default),
 xml, csv, by using namespace in HistoManager.hh
 
 - By default, all selected histos will be written on a file data.root.
@@ -41,6 +43,10 @@ in case of interactive running mode.
 
 
 # How to start ?
+
+## Pre-Requirements
+
+- Get ROOT, Geant4 (4.10.06.p02), cmake installed
 
 ## 1. Install
 
@@ -62,8 +68,6 @@ in case of interactive running mode.
 
 ## 3. Run the simulation
 
-
-
 - Recommand: Execute alpha in 'batch' mode from macro files
 
 > ./alpha run.mac
@@ -75,3 +79,9 @@ in case of interactive running mode.
 > /run/beamOn 1
 
 > exit
+
+## 4. View results
+
+> root
+
+> TBrowser a
