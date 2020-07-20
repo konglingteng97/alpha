@@ -2,7 +2,7 @@
  * @Author: Lingteng Kong 
  * @Date: 2020-07-15 20:27:11 
  * @Last Modified by: Lingteng Kong
- * @Last Modified time: 2020-07-17 01:52:41
+ * @Last Modified time: 2020-07-21 00:06:18
  */
 
 #include "StackingAction.hh"
@@ -66,7 +66,7 @@ StackingAction::ClassifyNewTrack(const G4Track * aTrack)
   if (ih) analysis->FillH1(ih, PosX);
           analysis->FillH1(ih+4, Ekin);
 
-  return fUrgent;
+  return fUrgent; 
 }
 
 //info in one event

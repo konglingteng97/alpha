@@ -12,7 +12,7 @@
 
 ## Physics list
 
-- Include radioactivedecay, ionization, scintillation process and relevant particle definition.
+- Mainly include radioactivedecay, ionization, scintillation, optical processes and relevant particle definition.
          
 ## Primary generator
 

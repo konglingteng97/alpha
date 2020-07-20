@@ -2,7 +2,7 @@
  * @Author: Lingteng Kong 
  * @Date: 2020-07-17 00:09:53 
  * @Last Modified by: Lingteng Kong
- * @Last Modified time: 2020-07-19 23:08:38
+ * @Last Modified time: 2020-07-20 23:52:24
  */
 
 #include "globals.hh"
@@ -12,16 +12,55 @@
 #include "G4ParticleTypes.hh"
 #include "G4ParticleTable.hh"
 
-#include "G4BosonConstructor.hh"
-#include "G4LeptonConstructor.hh"
-#include "G4MesonConstructor.hh"
-#include "G4BaryonConstructor.hh"
-#include "G4IonConstructor.hh"
-#include "G4ShortLivedConstructor.hh"
+// particles
+// Bosons
+#include "G4ChargedGeantino.hh"
+#include "G4Geantino.hh"
+#include "G4Gamma.hh"
+#include "G4OpticalPhoton.hh"
+
+// leptons
+#include "G4MuonPlus.hh"
+#include "G4MuonMinus.hh"
+#include "G4NeutrinoMu.hh"
+#include "G4AntiNeutrinoMu.hh"
+
+#include "G4Electron.hh"
+#include "G4Positron.hh"
+#include "G4NeutrinoE.hh"
+#include "G4AntiNeutrinoE.hh"
+
+// Mesons
+#include "G4PionPlus.hh"
+#include "G4PionMinus.hh"
+#include "G4PionZero.hh"
+#include "G4Eta.hh"
+#include "G4EtaPrime.hh"
+
+#include "G4KaonPlus.hh"
+#include "G4KaonMinus.hh"
+#include "G4KaonZero.hh"
+#include "G4AntiKaonZero.hh"
+#include "G4KaonZeroLong.hh"
+#include "G4KaonZeroShort.hh"
+
+// Baryons
+#include "G4Proton.hh"
+#include "G4AntiProton.hh"
+#include "G4Neutron.hh"
+#include "G4AntiNeutron.hh"
+
+// Nuclei
+#include "G4Deuteron.hh"
+#include "G4Triton.hh"
+#include "G4Alpha.hh"
+#include "G4GenericIon.hh"
 
 #include "G4ProcessManager.hh"
 
-//Op
+// Process
+// Optical
+#include "G4Cerenkov.hh"
 #include "G4Scintillation.hh"
 #include "G4OpAbsorption.hh"
 #include "G4OpRayleigh.hh"
@@ -35,6 +74,9 @@
 
 #include "G4Threading.hh"
 
+// Decay
+#include "G4Decay.hh"
+
 //radioactive decay
 #include "G4PhysicsListHelper.hh"
 #include "G4Radioactivation.hh"
@@ -44,27 +86,41 @@
 #include "G4NuclearLevelData.hh"
 #include "G4DeexPrecoParameters.hh"
 
-//EM
+// EM
+#include "G4ParticleDefinition.hh"
+#include "G4ProcessManager.hh"
+#include "G4PhysicsListHelper.hh"
+
 #include "G4ComptonScattering.hh"
 #include "G4GammaConversion.hh"
 #include "G4PhotoElectricEffect.hh"
+#include "G4RayleighScattering.hh"
+#include "G4KleinNishinaModel.hh"
 
 #include "G4eMultipleScattering.hh"
-#include "G4MuMultipleScattering.hh"
-#include "G4hMultipleScattering.hh"
-
 #include "G4eIonisation.hh"
 #include "G4eBremsstrahlung.hh"
 #include "G4eplusAnnihilation.hh"
 
+#include "G4MuMultipleScattering.hh"
 #include "G4MuIonisation.hh"
 #include "G4MuBremsstrahlung.hh"
 #include "G4MuPairProduction.hh"
 
+#include "G4hMultipleScattering.hh"
 #include "G4hIonisation.hh"
+#include "G4hBremsstrahlung.hh"
+#include "G4hPairProduction.hh"
+
+#include "G4ionIonisation.hh"
+#include "G4IonParametrisedLossModel.hh"
+#include "G4NuclearStopping.hh"
+#include "G4SystemOfUnits.hh"
+
 
 G4ThreadLocal G4int PhysicsList::fVerboseLevel = 0; // run in silent mode
-G4ThreadLocal G4int PhysicsList::fMaxNumPhotonStep = 20;
+G4ThreadLocal G4int PhysicsList::fMaxNumPhotonStep = 0; //set cerenkov photon = 0
+G4ThreadLocal G4Cerenkov* PhysicsList::fCerenkovProcess = 0;
 G4ThreadLocal G4Scintillation* PhysicsList::fScintillationProcess = 0;
 G4ThreadLocal G4OpAbsorption* PhysicsList::fAbsorptionProcess = 0;
 G4ThreadLocal G4OpRayleigh* PhysicsList::fRayleighScatteringProcess = 0;
@@ -100,52 +156,79 @@ PhysicsList::~PhysicsList()
 
 void PhysicsList::ConstructParticle()
 {
-  // In this method, static member functions should be called
-  // for all particles which you want to use.
-  // This ensures that objects of these particle types will be
-  // created in the program.
-
-  // pseudo-particles
+// pseudo-particles
   G4Geantino::GeantinoDefinition();
+  G4ChargedGeantino::ChargedGeantinoDefinition();
   
-  // gamma
+// gamma
   G4Gamma::GammaDefinition();
+  
+// optical photon
+  G4OpticalPhoton::OpticalPhotonDefinition();
 
-  // leptons
+// leptons
   G4Electron::ElectronDefinition();
   G4Positron::PositronDefinition();
+  G4MuonPlus::MuonPlusDefinition();
+  G4MuonMinus::MuonMinusDefinition();
 
   G4NeutrinoE::NeutrinoEDefinition();
   G4AntiNeutrinoE::AntiNeutrinoEDefinition();
-  
-  // baryons
+  G4NeutrinoMu::NeutrinoMuDefinition();
+  G4AntiNeutrinoMu::AntiNeutrinoMuDefinition();  
+
+// mesons
+  G4PionPlus::PionPlusDefinition();
+  G4PionMinus::PionMinusDefinition();
+  G4PionZero::PionZeroDefinition();
+  G4Eta::EtaDefinition();
+  G4EtaPrime::EtaPrimeDefinition();
+  G4KaonPlus::KaonPlusDefinition();
+  G4KaonMinus::KaonMinusDefinition();
+  G4KaonZero::KaonZeroDefinition();
+  G4AntiKaonZero::AntiKaonZeroDefinition();
+  G4KaonZeroLong::KaonZeroLongDefinition();
+  G4KaonZeroShort::KaonZeroShortDefinition();
+
+// barions
   G4Proton::ProtonDefinition();
-  G4Neutron::NeutronDefinition(); 
+  G4AntiProton::AntiProtonDefinition();
+  G4Neutron::NeutronDefinition();
+  G4AntiNeutron::AntiNeutronDefinition();
 
-  G4BosonConstructor bConstructor;
-  bConstructor.ConstructParticle();
-
-  G4LeptonConstructor lConstructor;
-  lConstructor.ConstructParticle();
-
-  G4MesonConstructor mConstructor;
-  mConstructor.ConstructParticle();
-
-  G4BaryonConstructor rConstructor;
-  rConstructor.ConstructParticle();
-
-  G4IonConstructor iConstructor;
-  iConstructor.ConstructParticle(); 
+// ions
+  G4Deuteron::DeuteronDefinition();
+  G4Triton::TritonDefinition();
+  G4Alpha::AlphaDefinition();
+  G4GenericIon::GenericIonDefinition(); 
 }
 
 //
 void PhysicsList::ConstructProcess()
 {
   AddTransportation();
+  ConstructDecay();
   ConstructRadioactiveDecay();
   ConstructEM();
   ConstructOp();
 }
+
+//Decay
+void PhysicsList::ConstructDecay()		
+ {		
+  G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
+    
+  // Decay Process
+  G4Decay* fDecayProcess = new G4Decay();
+
+  auto particleIterator=GetParticleIterator();
+  particleIterator->reset();
+  while( (*particleIterator)() ){
+    G4ParticleDefinition* particle = particleIterator->value();
+    if (fDecayProcess->IsApplicable(*particle)) 
+      ph->RegisterProcess(fDecayProcess, particle);    
+  }
+ }
 
 //radioactive decay process
 void PhysicsList::ConstructRadioactiveDecay()
@@ -171,55 +254,95 @@ void PhysicsList::ConstructRadioactiveDecay()
   ph->RegisterProcess(radioactiveDecay, G4GenericIon::GenericIon());
 }
 
-//EM process (ionisation)
+//EM process
 void PhysicsList::ConstructEM()
 {
+  G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
+  
+  // Add standard EM Processes
   auto particleIterator=GetParticleIterator();
   particleIterator->reset();
   while( (*particleIterator)() ){
     G4ParticleDefinition* particle = particleIterator->value();
-    G4ProcessManager* pmanager = particle->GetProcessManager();
     G4String particleName = particle->GetParticleName();
-
+     
     if (particleName == "gamma") {
-    // gamma
-      // Construct processes for gamma
-      pmanager->AddDiscreteProcess(new G4GammaConversion());
-      pmanager->AddDiscreteProcess(new G4ComptonScattering());
-      pmanager->AddDiscreteProcess(new G4PhotoElectricEffect());
 
+      ////ph->RegisterProcess(new G4RayleighScattering, particle);      
+      ph->RegisterProcess(new G4PhotoElectricEffect, particle);      
+      G4ComptonScattering* cs   = new G4ComptonScattering;
+      cs->SetEmModel(new G4KleinNishinaModel());
+      ph->RegisterProcess(cs, particle);
+      ph->RegisterProcess(new G4GammaConversion, particle);
+     
     } else if (particleName == "e-") {
-    //electron
-      // Construct processes for electron
-      pmanager->AddProcess(new G4eMultipleScattering(),-1, 1, 1);
-      pmanager->AddProcess(new G4eIonisation(),       -1, 2, 2);
-      pmanager->AddProcess(new G4eBremsstrahlung(),   -1, 3, 3);
 
+      ph->RegisterProcess(new G4eMultipleScattering(), particle);
+      //            
+      G4eIonisation* eIoni = new G4eIonisation();
+      eIoni->SetStepFunction(0.1, 100*um);      
+      ph->RegisterProcess(eIoni, particle);
+      //
+      ph->RegisterProcess(new G4eBremsstrahlung(), particle);      
+            
     } else if (particleName == "e+") {
-    //positron
-      // Construct processes for positron
-      pmanager->AddProcess(new G4eMultipleScattering(),-1, 1, 1);
-      pmanager->AddProcess(new G4eIonisation(),       -1, 2, 2);
-      pmanager->AddProcess(new G4eBremsstrahlung(),   -1, 3, 3);
-      pmanager->AddProcess(new G4eplusAnnihilation(),  0,-1, 4);
-
-    } else if( particleName == "mu+" ||
+    
+      ph->RegisterProcess(new G4eMultipleScattering(), particle);
+      //     
+      G4eIonisation* eIoni = new G4eIonisation();
+      eIoni->SetStepFunction(0.1, 100*um);      
+      ph->RegisterProcess(eIoni, particle);
+      //
+      ph->RegisterProcess(new G4eBremsstrahlung(), particle);
+      //
+      ph->RegisterProcess(new G4eplusAnnihilation(), particle);
+                  
+    } else if (particleName == "mu+" || 
                particleName == "mu-"    ) {
-    //muon
-     // Construct processes for muon
-     pmanager->AddProcess(new G4MuMultipleScattering(),-1, 1, 1);
-     pmanager->AddProcess(new G4MuIonisation(),      -1, 2, 2);
-     pmanager->AddProcess(new G4MuBremsstrahlung(),  -1, 3, 3);
-     pmanager->AddProcess(new G4MuPairProduction(),  -1, 4, 4);
 
-    } else {
-      if ((particle->GetPDGCharge() != 0.0) &&
-          (particle->GetParticleName() != "chargedgeantino") &&
-          !particle->IsShortLived()) {
-       // all others charged particles except geantino
-       pmanager->AddProcess(new G4hMultipleScattering(),-1,1,1);
-       pmanager->AddProcess(new G4hIonisation(),       -1,2,2);
-     }
+      ph->RegisterProcess(new G4MuMultipleScattering(), particle);
+      G4MuIonisation* muIoni = new G4MuIonisation();
+      muIoni->SetStepFunction(0.1, 50*um);      
+      ph->RegisterProcess(muIoni, particle);
+      ph->RegisterProcess(new G4MuBremsstrahlung(), particle);
+      ph->RegisterProcess(new G4MuPairProduction(), particle);
+                   
+    } else if( particleName == "proton" ||
+               particleName == "pi-" ||
+               particleName == "pi+"    ) {
+
+      ph->RegisterProcess(new G4hMultipleScattering(), particle);      
+      G4hIonisation* hIoni = new G4hIonisation();
+      hIoni->SetStepFunction(0.1, 20*um);
+      ph->RegisterProcess(hIoni, particle);
+      ph->RegisterProcess(new G4hBremsstrahlung(), particle);
+      ph->RegisterProcess(new G4hPairProduction(), particle);            
+     
+    } else if( particleName == "alpha" || 
+               particleName == "He3"    ) {
+
+      ph->RegisterProcess(new G4hMultipleScattering(), particle);           
+      G4ionIonisation* ionIoni = new G4ionIonisation();
+      ionIoni->SetStepFunction(0.1, 1*um);
+      ph->RegisterProcess(ionIoni, particle);
+      ph->RegisterProcess(new G4NuclearStopping(), particle);      
+            
+    } else if( particleName == "GenericIon" ) {
+
+      ph->RegisterProcess(new G4hMultipleScattering(), particle);          
+      G4ionIonisation* ionIoni = new G4ionIonisation();
+      ionIoni->SetEmModel(new G4IonParametrisedLossModel());
+      ionIoni->SetStepFunction(0.1, 1*um);
+      ph->RegisterProcess(ionIoni, particle);
+      ph->RegisterProcess(new G4NuclearStopping(), particle);                   
+      
+    } else if ((!particle->IsShortLived()) &&
+               (particle->GetPDGCharge() != 0.0) && 
+               (particle->GetParticleName() != "chargedgeantino")) {
+               
+      //all others charged particles except geantino
+      ph->RegisterProcess(new G4hMultipleScattering(), particle);
+      ph->RegisterProcess(new G4hIonisation(), particle);
     }
   }
 }
@@ -227,6 +350,12 @@ void PhysicsList::ConstructEM()
 //scintillation and other optical process
 void PhysicsList::ConstructOp()
 {
+  G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
+  
+  fCerenkovProcess = new G4Cerenkov("Cerenkov");		
+  fCerenkovProcess->SetMaxNumPhotonsPerStep(fMaxNumPhotonStep);		
+  fCerenkovProcess->SetMaxBetaChangePerStep(10.0);		
+  fCerenkovProcess->SetTrackSecondariesFirst(true);
   fScintillationProcess = new G4Scintillation("Scintillation");
   fScintillationProcess->SetScintillationYieldFactor(1.);
   fScintillationProcess->SetTrackSecondariesFirst(true);
@@ -235,6 +364,7 @@ void PhysicsList::ConstructOp()
   fMieHGScatteringProcess = new G4OpMieHG();
   fBoundaryProcess = new G4OpBoundaryProcess();
 
+  fCerenkovProcess->SetVerboseLevel(fVerboseLevel);
   fScintillationProcess->SetVerboseLevel(fVerboseLevel);
   fAbsorptionProcess->SetVerboseLevel(fVerboseLevel);
   fRayleighScatteringProcess->SetVerboseLevel(fVerboseLevel);
@@ -253,35 +383,45 @@ void PhysicsList::ConstructOp()
   particleIterator->reset();
   while( (*particleIterator)() ){
     G4ParticleDefinition* particle = particleIterator->value();
-    G4ProcessManager* pmanager = particle->GetProcessManager();
     G4String particleName = particle->GetParticleName();
+
+    if (fCerenkovProcess->IsApplicable(*particle)) {	
+       ph->RegisterProcess(fCerenkovProcess, particle);   			
+    }
     if (fScintillationProcess->IsApplicable(*particle)) {
       //limit the scintillation process to electron
       if (particleName == "e-"){
-        pmanager->AddProcess(fScintillationProcess);
-        pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
-        pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
+        ph->RegisterProcess(fScintillationProcess, particle);
       }
     }
     if (particleName == "opticalphoton") {
-      pmanager->AddDiscreteProcess(fAbsorptionProcess);
-      pmanager->AddDiscreteProcess(fRayleighScatteringProcess);
-      pmanager->AddDiscreteProcess(fMieHGScatteringProcess);
-      pmanager->AddDiscreteProcess(fBoundaryProcess);
+      ph->RegisterProcess(fAbsorptionProcess, particle);
+      ph->RegisterProcess(fRayleighScatteringProcess, particle);
+      ph->RegisterProcess(fMieHGScatteringProcess, particle);
+      ph->RegisterProcess(fBoundaryProcess, particle);
     }
   }
 }
+
 
 void PhysicsList::SetVerbose(G4int verbose)
 {
   fVerboseLevel = verbose;
 
+  fCerenkovProcess->SetVerboseLevel(fVerboseLevel);
   fScintillationProcess->SetVerboseLevel(fVerboseLevel);
   fAbsorptionProcess->SetVerboseLevel(fVerboseLevel);
   fRayleighScatteringProcess->SetVerboseLevel(fVerboseLevel);
   fMieHGScatteringProcess->SetVerboseLevel(fVerboseLevel);
   fBoundaryProcess->SetVerboseLevel(fVerboseLevel);
 }
+
+void PhysicsList::SetNbOfPhotonsCerenkov(G4int MaxNumber)		
+ {		
+   fMaxNumPhotonStep = MaxNumber;		
+
+    fCerenkovProcess->SetMaxNumPhotonsPerStep(fMaxNumPhotonStep);		
+ }
 
 void PhysicsList::SetCuts()
 {
