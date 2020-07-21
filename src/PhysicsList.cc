@@ -2,11 +2,12 @@
  * @Author: Lingteng Kong 
  * @Date: 2020-07-17 00:09:53 
  * @Last Modified by: Lingteng Kong
- * @Last Modified time: 2020-07-20 23:52:24
+ * @Last Modified time: 2020-07-22 00:25:33
  */
 
 #include "globals.hh"
 #include "PhysicsList.hh"
+#include "PhysicsListMessenger.hh"
 
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTypes.hh"
@@ -120,6 +121,10 @@
 
 G4ThreadLocal G4int PhysicsList::fVerboseLevel = 0; // run in silent mode
 G4ThreadLocal G4int PhysicsList::fMaxNumPhotonStep = 0; //set cerenkov photon = 0
+
+G4ThreadLocal G4Decay* PhysicsList::fDecayProcess = 0;
+G4ThreadLocal G4Radioactivation* PhysicsList::fRadioactiveDecay = 0;
+
 G4ThreadLocal G4Cerenkov* PhysicsList::fCerenkovProcess = 0;
 G4ThreadLocal G4Scintillation* PhysicsList::fScintillationProcess = 0;
 G4ThreadLocal G4OpAbsorption* PhysicsList::fAbsorptionProcess = 0;
@@ -128,9 +133,10 @@ G4ThreadLocal G4OpMieHG* PhysicsList::fMieHGScatteringProcess = 0;
 G4ThreadLocal G4OpBoundaryProcess* PhysicsList::fBoundaryProcess = 0;
  
 //
-PhysicsList::PhysicsList() 
- : G4VUserPhysicsList()
+PhysicsList::PhysicsList() : G4VUserPhysicsList()
 {
+  fMessenger = new PhysicsListMessenger(this);
+
   // mandatory for G4NuclideTable
   G4NuclideTable::GetInstance()->SetThresholdOfHalfLife(0.1*picosecond);
   G4NuclideTable::GetInstance()->SetLevelTolerance(1.0*eV);
@@ -152,7 +158,9 @@ PhysicsList::PhysicsList()
 }
 
 PhysicsList::~PhysicsList() 
-{}
+{
+  delete fMessenger;
+}
 
 void PhysicsList::ConstructParticle()
 {
@@ -219,7 +227,7 @@ void PhysicsList::ConstructDecay()
   G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
     
   // Decay Process
-  G4Decay* fDecayProcess = new G4Decay();
+  fDecayProcess = new G4Decay();
 
   auto particleIterator=GetParticleIterator();
   particleIterator->reset();
@@ -233,10 +241,10 @@ void PhysicsList::ConstructDecay()
 //radioactive decay process
 void PhysicsList::ConstructRadioactiveDecay()
 {
-  G4Radioactivation* radioactiveDecay = new G4Radioactivation();
+  fRadioactiveDecay = new G4Radioactivation();
 
   G4bool ARMflag = false;
-  radioactiveDecay->SetARM(ARMflag);        //Atomic Rearangement
+  fRadioactiveDecay->SetARM(ARMflag);        //Atomic Rearangement
 
   // need to initialize atomic deexcitation
   G4LossTableManager* man = G4LossTableManager::Instance();
@@ -251,7 +259,7 @@ void PhysicsList::ConstructRadioactiveDecay()
 
   // register radioactiveDecay
   G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
-  ph->RegisterProcess(radioactiveDecay, G4GenericIon::GenericIon());
+  ph->RegisterProcess(fRadioactiveDecay, G4GenericIon::GenericIon());
 }
 
 //EM process
@@ -363,13 +371,6 @@ void PhysicsList::ConstructOp()
   fRayleighScatteringProcess = new G4OpRayleigh();
   fMieHGScatteringProcess = new G4OpMieHG();
   fBoundaryProcess = new G4OpBoundaryProcess();
-
-  fCerenkovProcess->SetVerboseLevel(fVerboseLevel);
-  fScintillationProcess->SetVerboseLevel(fVerboseLevel);
-  fAbsorptionProcess->SetVerboseLevel(fVerboseLevel);
-  fRayleighScatteringProcess->SetVerboseLevel(fVerboseLevel);
-  fMieHGScatteringProcess->SetVerboseLevel(fVerboseLevel);
-  fBoundaryProcess->SetVerboseLevel(fVerboseLevel);
   
   // Use Birks Correction in the Scintillation process
   if(G4Threading::IsMasterThread())
@@ -403,10 +404,13 @@ void PhysicsList::ConstructOp()
   }
 }
 
-
+//0 for silent mode
 void PhysicsList::SetVerbose(G4int verbose)
 {
   fVerboseLevel = verbose;
+
+  fDecayProcess->SetVerboseLevel(fVerboseLevel);
+  fRadioactiveDecay->SetVerboseLevel(fVerboseLevel);
 
   fCerenkovProcess->SetVerboseLevel(fVerboseLevel);
   fScintillationProcess->SetVerboseLevel(fVerboseLevel);

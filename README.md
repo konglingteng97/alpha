@@ -6,14 +6,22 @@
 
 - Data: 29.06.2020
 
-## Geometry construction
+## Detector construction
 
-- A square box with length of 10 m, filled with gas.
+- Include definititon of relevant material and geometry construction.
+
+- The geomrtry is a square box with length of 10 m, filled with gas.
+
+- The fluorescence material include Air, Nitrogen, Argon gas.
+
+- You are able to set the material with the command: /alpha/det/setMat  material
 
 ## Physics list
 
 - Mainly include radioactivedecay, ionization, scintillation, optical processes and relevant particle definition.
-         
+
+- You are able to change the verbose level with the command: /alpha/phys/verbose number, 0 for silent mode (currently not for EM process)
+
 ## Primary generator
 
 - Default kinematic is an ion (Am-241), at rest, at coordinate origin. 
@@ -68,7 +76,9 @@ in case of interactive running mode.
 
 ## 3. Run the simulation
 
-- Recommand: Execute alpha in 'batch' mode from macro files
+- Recommand: Execute alpha in 'batch' mode from macro files.
+
+- You are able to change the parameters by editing run.mac
 
 > ./alpha run.mac
    

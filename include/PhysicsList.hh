@@ -13,6 +13,11 @@
 #include "globals.hh"
 #include "G4VUserPhysicsList.hh"
 
+class PhysicsListMessenger;
+
+class G4Decay;
+class G4Radioactivation;
+
 class G4Cerenkov;
 class G4Scintillation;
 class G4OpAbsorption;
@@ -47,8 +52,13 @@ class PhysicsList : public G4VUserPhysicsList
  
   private:
 
+    PhysicsListMessenger*   fMessenger;  
+
     static G4ThreadLocal G4int fVerboseLevel;
     static G4ThreadLocal G4int fMaxNumPhotonStep;
+
+    static G4ThreadLocal G4Decay* fDecayProcess;
+    static G4ThreadLocal G4Radioactivation* fRadioactiveDecay;
 
     static G4ThreadLocal G4Cerenkov* fCerenkovProcess;
     static G4ThreadLocal G4Scintillation* fScintillationProcess;
