@@ -54,7 +54,9 @@ target_link_libraries(${PROJ_NAME} ${Geant4_LIBRARIES} )
 # relies on these scripts being in the current working directory.
 #
 set(EXAMPLEB1_SCRIPTS
-  run.mac
+  air.mac
+  N2.mac
+  Ar.mac
   vis.mac
   )
 

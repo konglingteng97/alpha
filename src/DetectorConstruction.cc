@@ -62,7 +62,7 @@ void DetectorConstruction::DefineMaterials()
   Air->AddElement(O, fractionmass=30.*perCent);
 
   G4Material* N2 = 
-  new G4Material("Nitrogen", density= 1.251*mg/cm3, ncomponents=1);
+  new G4Material("N2", density= 1.251*mg/cm3, ncomponents=1);
   N2->AddElement(N, fractionmass=1.);
 
   G4Material* H2O = 
@@ -78,7 +78,7 @@ void DetectorConstruction::DefineMaterials()
   steam->GetIonisation()->SetMeanExcitationEnergy(71.6*eV); 
 
   G4Material* argonGas =   
-  new G4Material("ArgonGas", z=18, a=39.948*g/mole, density= 1.782*mg/cm3,
+  new G4Material("argonGas", z=18, a=39.948*g/mole, density= 1.782*mg/cm3,
                  kStateGas, 273.15*kelvin, 1*atmosphere);
 
  //Matrial properties for scintillation process

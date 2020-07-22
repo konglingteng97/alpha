@@ -78,9 +78,9 @@ in case of interactive running mode.
 
 - Recommand: Execute alpha in 'batch' mode from macro files.
 
-- You are able to change the parameters by editing run.mac
+- You are able to change the parameters by editing {material}.mac
 
-> ./alpha run.mac
+> ./alpha {material}.mac
    
 - Execute alpha in 'interactive mode' with visualization
 

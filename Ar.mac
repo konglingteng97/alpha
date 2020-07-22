@@ -4,17 +4,17 @@
 /run/verbose 0
 /alpha/phys/verbose 0
 #
-/alpha/det/setMat Air
+/alpha/det/setMat argonGas
 #
 /gun/particle ion
 /gun/ion 95 241
 #
-/analysis/setFileName data
-/analysis/h1/set 0  100   -2.   2.    cm    #scintillation x
-/analysis/h1/set 1  1000  3.   4.2    eV 	#scintillation Ekin
-/analysis/h1/set 2  1000  300. 400.     	#scintillation wavelength
+/analysis/setFileName Ar
+/analysis/h1/set 0  100   -5.   5.    cm    #scintillation x
+/analysis/h1/set 1  1000  1.    6.    eV 	#scintillation Ekin
+/analysis/h1/set 2  1000  100.  1000.     	#scintillation wavelength
 /analysis/h1/set 3  100   -1.   1.    cm 	#photon x
-/analysis/h1/set 4  100   -2.   2.    cm    #electron x
+/analysis/h1/set 4  100   -5.   5.    cm    #electron x
 /analysis/h1/set 5  100   -2    2.    cm	#alpha x
 /analysis/h1/set 6  100   -2.   2.    cm	#ions x
 /analysis/h1/set 7  100   0.   10.    eV	#photon Ekin
