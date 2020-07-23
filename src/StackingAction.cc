@@ -22,6 +22,8 @@
 #include "g4root.hh"
 #include "G4RunManager.hh"
 
+#include "G4PhysicalConstants.hh"
+
 //stacking action is a higher level of stepping action, save track info
 //a track is a particle
 StackingAction::StackingAction()
@@ -36,9 +38,16 @@ StackingAction::ClassifyNewTrack(const G4Track * aTrack)
 {
   G4ParticleDefinition* particle = aTrack->GetDefinition();
 
-  G4double Ekin = aTrack->GetKineticEnergy();  //kinetic energy
-  G4double PosX = aTrack->GetPosition().x();   //x position
-  G4int fCharge = particle->GetPDGCharge(); //charge of particle
+  G4double Ekin           = aTrack->GetKineticEnergy();                 //kinetic energy
+  G4int fCharge           = particle->GetPDGCharge();                   //charge of particle
+  G4int pid               = aTrack->GetDynamicParticle()->GetPDGcode(); //particle ID
+  G4ThreeVector vertex    = aTrack->GetPosition();                      //position
+  G4ThreeVector direction = aTrack->GetMomentumDirection();             //momentum direction
+  G4double weight         = aTrack->GetWeight();
+
+  G4double x = vertex.x(), y = vertex.y(), z = vertex.z();
+  G4double theta = direction.theta(), phi = direction.phi();
+  if (phi < 0.) phi += twopi; 
 
   G4AnalysisManager* analysis = G4AnalysisManager::Instance();
 
@@ -48,10 +57,14 @@ StackingAction::ClassifyNewTrack(const G4Track * aTrack)
     if(aTrack->GetParentID()>0)
     { // particle is secondary
       if(aTrack->GetCreatorProcess()->GetProcessName() == "Scintillation")
-        analysis->FillH1(0,PosX);
+        //distribution and spectra
+        analysis->FillH1(0,x);
         analysis->FillH1(1,Ekin);
         G4double wl = 1.24e-3/Ekin;  //wavelength, hc = 1.24e-3 nm * MeV
         analysis->FillH1(2,wl);
+
+        //2D distribution
+        analysis->FillH2(0,x,y);
     }
   }
 
@@ -63,8 +76,19 @@ StackingAction::ClassifyNewTrack(const G4Track * aTrack)
   else if (particle == G4Alpha::Alpha()) ih = 5;
   else if (fCharge > 2.) ih = 6;
   
-  if (ih) analysis->FillH1(ih, PosX);
+  if (ih) analysis->FillH1(ih, x);
           analysis->FillH1(ih+4, Ekin);
+
+  //fill ntuple
+  analysis->FillNtupleIColumn(0,pid);
+  analysis->FillNtupleDColumn(1,Ekin);
+  analysis->FillNtupleDColumn(2,x);
+  analysis->FillNtupleDColumn(3,y);
+  analysis->FillNtupleDColumn(4,z);
+  analysis->FillNtupleDColumn(5,theta);
+  analysis->FillNtupleDColumn(6,phi);
+  analysis->FillNtupleDColumn(7,weight);
+  analysis->AddNtupleRow();  
 
   return fUrgent; 
 }

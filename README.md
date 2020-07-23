@@ -30,11 +30,14 @@
          
 ## Histograms
 
-- Include distribution and energy spectrum of relevent particles.
+- 1D histograms of distribution and energy spectrum of relevent particles.
+
+- 2D histogram of distribution of scintillation photon in xy plane.
+
+- nTuples information of all particles.
 
 - The histos can be individually activated with the command :
 /analysis/h1/set id nbBins  valMin valMax unit 
-where unit is the desired unit for the histo (MeV or keV, mm or cm, etc..)
 
 - One can control the name of the histograms file with the command:
 /analysis/setFileName  name 

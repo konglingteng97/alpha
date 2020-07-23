@@ -30,7 +30,8 @@ void HistoManager::Book()
   analysisManager->SetVerboseLevel(1);
   analysisManager->SetActivation(true);     //enable inactivation of histograms
   
-  // Define histograms start values
+
+  // 1D histograms
   //do not forget to change StackingAction.cc
   const G4int kMaxHisto = 11;
   const G4String id[] = {"0","1","2","3","4","5","6","7","8","9","10"};
@@ -56,10 +57,32 @@ void HistoManager::Book()
   G4double vmin = 0.;
   G4double vmax = 100.;
 
-  // Create all histograms as inactivated 
+  // Create all 1D histograms as inactivated 
   // as we have not yet set nbins, vmin, vmax
   for (G4int k=0; k<kMaxHisto; k++) {
-    G4int ih = analysisManager->CreateH1(id[k], title[k], nbins, vmin, vmax);
-    analysisManager->SetH1Activation(ih, false);
+    G4int ih1 = analysisManager->CreateH1(id[k], title[k], nbins, vmin, vmax); //in1 begin from 0
+    analysisManager->SetH1Activation(ih1, false);
   }
+
+  // 2D histograms
+  G4int ih2 = analysisManager->CreateH2("11", "2D distribution of scintillation photon",
+                                       nbins, vmin, vmax, nbins, vmin, vmax); //ih2 begin from 0
+  analysisManager->SetH2Activation(ih2, true);
+
+  //nTuples
+  analysisManager->SetNtupleDirectoryName("ntuple");
+  analysisManager->SetFirstNtupleId(1);       
+  analysisManager->CreateNtuple("101", "Particle Tuple");
+  analysisManager->CreateNtupleIColumn("particleID");    //column 0
+  analysisManager->CreateNtupleDColumn("Ekin");          //column 1
+  analysisManager->CreateNtupleDColumn("posX");          //column 2
+  analysisManager->CreateNtupleDColumn("posY");          //column 3
+  analysisManager->CreateNtupleDColumn("posZ");          //column 4
+  analysisManager->CreateNtupleDColumn("dirTheta");      //column 5
+  analysisManager->CreateNtupleDColumn("dirPhi");        //column 6
+  analysisManager->CreateNtupleDColumn("weight");        //column 7
+  analysisManager->FinishNtuple();
+  
+  analysisManager->SetNtupleActivation(false); 
+
 }

@@ -21,6 +21,11 @@
 /analysis/h1/set 8  1000  0.   10.    keV   #electron Ekin
 /analysis/h1/set 9  100   0.   10.    MeV	#alpha Ekin
 /analysis/h1/set 10 100   0.   2.     MeV   #ions Ekin
+
+/analysis/h2/setX  0 100  -10. 10.    cm    #2d scintillation x
+/analysis/h2/setY  0 100  -10. 10.    cm    #2d scintillation y
+
+/analysis/ntuple/setActivation 1 true
 #
 /run/printProgress 10000
 #  
