@@ -9,15 +9,14 @@
 /gun/particle ion
 /gun/ion 95 241
 #
-/analysis/setFileName N2
-/analysis/h1/set 0  100   -5.   5.    cm    #scintillation x
+/analysis/h1/set 0  100   -10.   10.    cm    #scintillation x
 /analysis/h1/set 1  1000  3.    6.    eV 	#scintillation Ekin
 /analysis/h1/set 2  1000  200. 400.     	#scintillation wavelength
-/analysis/h1/set 3  100   -1.   1.    cm 	#photon x
+/analysis/h1/set 3  100   -10.   10.    cm 	#photon x
 /analysis/h1/set 4  100   -5.   5.    cm    #electron x
-/analysis/h1/set 5  100   -2    2.    cm	#alpha x
-/analysis/h1/set 6  100   -2.   2.    cm	#ions x
-/analysis/h1/set 7  100   0.   10.    eV	#photon Ekin
+/analysis/h1/set 5  100   -10    10.    cm	#alpha x
+/analysis/h1/set 6  100   -10.   10.    cm	#ions x
+/analysis/h1/set 7  100   0.   100.    eV	#photon Ekin
 /analysis/h1/set 8  1000  0.   10.    keV   #electron Ekin
 /analysis/h1/set 9  100   0.   10.    MeV	#alpha Ekin
 /analysis/h1/set 10 100   0.   2.     MeV   #ions Ekin

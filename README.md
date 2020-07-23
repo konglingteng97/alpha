@@ -24,7 +24,9 @@
 
 ## Primary generator
 
-- Default kinematic is an ion (Am-241), at rest, at coordinate origin. 
+- Default radioactive source is Am-241, at rest. 
+
+- The radioactive source is dispersed over a 2 cm radius circle at coordinate origin.
          
 ## Histograms
 
