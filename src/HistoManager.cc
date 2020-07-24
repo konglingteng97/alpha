@@ -2,7 +2,7 @@
  * @Author: Lingteng Kong 
  * @Date: 2020-07-15 15:11:11 
  * @Last Modified by: Lingteng Kong
- * @Last Modified time: 2020-07-17 02:07:14
+ * @Last Modified time: 2020-07-23 20:13:06
  */
 
 #include "HistoManager.hh"
@@ -33,6 +33,8 @@ void HistoManager::Book()
 
   // 1D histograms
   //do not forget to change StackingAction.cc
+  analysisManager->SetHistoDirectoryName("histo");  
+
   const G4int kMaxHisto = 11;
   const G4String id[] = {"0","1","2","3","4","5","6","7","8","9","10"};
   const G4String title[] = 

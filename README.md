@@ -59,7 +59,7 @@ in case of interactive running mode.
 
 ## Pre-Requirements
 
-- Get ROOT, Geant4 (4.10.06.p02), cmake installed
+- Get ROOT (6.22/00), Geant4 (4.10.06.p02), CMake (3.18.0-rc4) installed
 
 ## 1. Install
 
@@ -85,7 +85,11 @@ in case of interactive running mode.
 
 - You are able to change the parameters by editing {material}.mac
 
-> ./alpha {material}.mac
+> ./alpha air.mac
+
+> ./alpha N2.mac
+
+> ./alpha Ar.mac
    
 - Execute alpha in 'interactive mode' with visualization
 
@@ -100,3 +104,11 @@ in case of interactive running mode.
 > root
 
 > TBrowser a
+
+## 5. Plot figures
+
+- You are able to plot figures useing python script plt.py
+
+> python plt.py
+
+- figures are saved as pdf files in /build 

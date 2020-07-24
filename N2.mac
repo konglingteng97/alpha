@@ -9,6 +9,7 @@
 /gun/particle ion
 /gun/ion 95 241
 #
+/analysis/setFileName N2
 /analysis/h1/set 0  100   -10.   10.    cm    #scintillation x
 /analysis/h1/set 1  1000  3.    6.    eV 	#scintillation Ekin
 /analysis/h1/set 2  1000  200. 400.     	#scintillation wavelength
